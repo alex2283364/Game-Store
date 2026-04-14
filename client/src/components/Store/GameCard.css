@@ -1,0 +1,67 @@
+.game-card {
+    background: #1b2838;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #2a475e;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    border-color: #66c0f4;
+}
+
+.game-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.game-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.game-info {
+    padding: 15px;
+}
+
+.game-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #c7d5e0;
+}
+
+.game-genre {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #66c0f4;
+    background: #2a475e;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.game-description {
+    margin: 0 0 15px 0;
+    font-size: 13px;
+    color: #8b9bb4;
+    line-height: 1.4;
+}
+
+.game-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4c6b22;
+}
+
+.game-rating {
+    color: #ffd700;
+}
