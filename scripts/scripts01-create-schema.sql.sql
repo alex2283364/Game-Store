@@ -187,6 +187,41 @@ ON "Friendships" ("FriendId");
 CREATE INDEX IF NOT EXISTS "IX_Friendships_Status" 
 ON "Friendships" ("Status");
 
+-- =====================================================
+-- СОЗДАНИЕ ТАБЛИЦЫ КОРЗИНЫ
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS "CartItems" (
+    "Id" SERIAL PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "GameId" INTEGER NOT NULL,
+    "AddedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT "FK_CartItems_Users_UserId"
+        FOREIGN KEY ("UserId")
+        REFERENCES "Users" ("Id")
+        ON DELETE CASCADE,
+    CONSTRAINT "FK_CartItems_Games_GameId"
+        FOREIGN KEY ("GameId")
+        REFERENCES "Games" ("Id")
+        ON DELETE CASCADE
+);
+
+-- Уникальный индекс (чтобы нельзя было добавить одну игру дважды)
+CREATE UNIQUE INDEX IF NOT EXISTS "IX_CartItems_UserId_GameId" 
+ON "CartItems" ("UserId", "GameId");
+
+-- Индексы для производительности
+CREATE INDEX IF NOT EXISTS "IX_CartItems_UserId" 
+ON "CartItems" ("UserId");
+
+CREATE INDEX IF NOT EXISTS "IX_CartItems_GameId" 
+ON "CartItems" ("GameId");
+
+SELECT '✅ Таблица CartItems создана!' AS Status;
+
+-- Проверка
+SELECT COUNT(*) as "Игр в корзине" FROM "CartItems";
+
 SELECT '✅ Таблица Friendships создана!' AS Status;
 
 -- Готово!
