@@ -1,81 +1,98 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
-using server.DTOs.Orders;
 using server.Models;
 
-namespace server.Controllers
+namespace server.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class OrdersController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class OrdersController : ControllerBase
+    private readonly AppDbContext _context;
+
+    public OrdersController(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-        private readonly ILogger<OrdersController> _logger;
-
-        public OrdersController(AppDbContext context, ILogger<OrdersController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
-        {
-            try
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-                
-                var games = await _context.Games
-                    .Where(g => dto.GameIds.Contains(g.Id))
-                    .ToListAsync();
-
-                if (games.Count != dto.GameIds.Count)
-                    return BadRequest(new { message = "Some games not found" });
-
-                var totalPrice = games.Sum(g => g.Price);
-
-                var order = new Order
-                {
-                    UserId = userId,
-                    TotalPrice = totalPrice,
-                    Status = "completed",
-                    CreatedAt = DateTime.UtcNow,
-                    Items = games.Select(g => new OrderItem
-                    {
-                        GameId = g.Id,
-                        Price = g.Price
-                    }).ToList()
-                };
-
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { orderId = order.Id, total = totalPrice });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Order creation error");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("my")]
-        public async Task<IActionResult> GetMyOrders()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            
-            var orders = await _context.Orders
-                .Where(o => o.UserId == userId)
-                .Include(o => o.Items)
-                    .ThenInclude(i => i.Game)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
-
-            return Ok(orders);
-        }
+        _context = context;
     }
+
+    // GET: api/orders - История заказов текущего пользователя
+    [HttpGet]
+    public async Task<ActionResult<List<OrderDto>>> GetOrders()
+    {
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
+        
+        var orders = await _context.Orders
+            .Where(o => o.UserId == userId)
+            .Include(o => o.OrderItems)  // 🔥 ИСПРАВЛЕНО: было .Items
+                .ThenInclude(oi => oi.Game)
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(o => new OrderDto
+            {
+                Id = o.Id,
+                TotalPrice = o.TotalPrice,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt,
+                Items = o.OrderItems.Select(oi => new OrderItemDto  // 🔥 ИСПРАВЛЕНО: было o.Items
+                {
+                    GameId = oi.GameId,
+                    GameTitle = oi.Game.Title,
+                    Price = oi.Price
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return Ok(orders);
+    }
+
+    // GET: api/orders/{id} - Детали заказа
+    [HttpGet("{id}")]
+    public async Task<ActionResult<OrderDto>> GetOrder(int id)
+    {
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
+        
+        var order = await _context.Orders
+            .Where(o => o.Id == id && o.UserId == userId)
+            .Include(o => o.OrderItems)  // 🔥 ИСПРАВЛЕНО: было .Items
+                .ThenInclude(oi => oi.Game)
+            .Select(o => new OrderDto
+            {
+                Id = o.Id,
+                TotalPrice = o.TotalPrice,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt,
+                Items = o.OrderItems.Select(oi => new OrderItemDto  // 🔥 ИСПРАВЛЕНО: было o.Items
+                {
+                    GameId = oi.GameId,
+                    GameTitle = oi.Game.Title,
+                    Price = oi.Price
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (order == null)
+            return NotFound();
+
+        return Ok(order);
+    }
+}
+
+// DTO для заказа
+public class OrderDto
+{
+    public int Id { get; set; }
+    public decimal TotalPrice { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public List<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
+}
+
+// DTO для элемента заказа
+public class OrderItemDto
+{
+    public int GameId { get; set; }
+    public string GameTitle { get; set; } = string.Empty;
+    public decimal Price { get; set; }
 }

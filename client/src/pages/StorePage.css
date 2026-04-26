@@ -1,0 +1,279 @@
+.store-page {
+    min-height: 100vh;
+    background: #0f1419;
+    color: #c7d5e0;
+    padding: 20px;
+}
+
+.store-header {
+    margin-bottom: 30px;
+}
+
+.store-header h1 {
+    color: #66c0f4;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.store-subtitle {
+    color: #8b9bb4;
+    font-size: 16px;
+}
+
+/* Панель фильтров */
+.filters-panel {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #1b2838;
+    border-radius: 8px;
+    border: 1px solid #2a475e;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #66c0f4;
+    font-size: 14px;
+}
+
+.search-input, .filter-select {
+    padding: 10px 15px;
+    border: 2px solid #2a475e;
+    border-radius: 4px;
+    background: #2a475e;
+    color: #c7d5e0;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus, .filter-select:focus {
+    outline: none;
+    border-color: #66c0f4;
+}
+
+/* Сетка игр */
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.game-card {
+    background: #1b2838;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #2a475e;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    border-color: #66c0f4;
+    box-shadow: 0 10px 30px rgba(102, 192, 244, 0.2);
+}
+
+.game-image {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+
+.game-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s;
+}
+
+.game-card:hover .game-image img {
+    transform: scale(1.05);
+}
+
+.game-info {
+    padding: 15px;
+}
+
+.game-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #c7d5e0;
+    font-weight: 600;
+}
+
+.game-genre {
+    display: inline-block;
+    font-size: 12px;
+    color: #66c0f4;
+    background: #2a475e;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.game-description {
+    margin: 0 0 15px 0;
+    font-size: 13px;
+    color: #8b9bb4;
+    line-height: 1.5;
+}
+
+.game-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #2a475e;
+}
+
+.game-rating {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+.game-date {
+    color: #666;
+    font-size: 13px;
+}
+
+.game-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-price {
+    font-size: 22px;
+    font-weight: bold;
+    color: #4c6b22;
+}
+
+.add-to-cart-btn {
+    background: #66c0f4;
+    color: #1b2838;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.add-to-cart-btn:hover {
+    background: #4a9fd8;
+}
+
+/* Пустое состояние */
+.no-games {
+    text-align: center;
+    padding: 80px 20px;
+    color: #8b9bb4;
+}
+
+.no-games p {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.no-games .hint {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Loader */
+.loader {
+    text-align: center;
+    padding: 80px;
+    color: #66c0f4;
+    font-size: 18px;
+}
+
+/* Кнопка добавления в корзину */
+.btn-add-cart {
+  background: linear-gradient(135deg, #4c6b22, #5c7b32);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.btn-add-cart:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5c7b32, #6c8b42);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 107, 34, 0.4);
+}
+
+.btn-add-cart:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-add-cart:disabled {
+  background: #2a475e;
+  color: #8b9bb4;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Иконка корзины в кнопке */
+.btn-add-cart::before {
+
+  font-size: 16px;
+}
+
+/* Анимация при добавлении */
+@keyframes addToCart {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.btn-add-cart.added {
+  animation: addToCart 0.3s ease;
+  background: linear-gradient(135deg, #2a475e, #3a5d6c);
+}
+
+/* Для уже купленной игры */
+.btn-add-cart.owned {
+  background: #2a475e;
+  color: #8b9bb4;
+  cursor: default;
+}
+
+.btn-add-cart.owned::before {
+  content: '✓';
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .filters-panel {
+        flex-direction: column;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}

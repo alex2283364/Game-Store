@@ -1,29 +1,24 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
-namespace server.Models
+
+namespace server.Models;
+
+public class Message
 {
-    public class Message
-    {
-        [Key]
-        public int Id { get; set; }
-        
-        public int SenderId { get; set; }
-        
-        public int RecipientId { get; set; }
-        
-        public string Content { get; set; } = string.Empty;
-        
-        public bool IsRead { get; set; } = false;
-        
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
-        
-        [ForeignKey("SenderId")]
-        [JsonIgnore]
-        public virtual User? Sender { get; set; }
-        
-        [ForeignKey("RecipientId")]
-        [JsonIgnore]
-        public virtual User? Recipient { get; set; }
-    }
+    [Key]
+    public int Id { get; set; }
+    
+    public int SenderId { get; set; }
+    [ForeignKey("SenderId")]
+    public User Sender { get; set; } = null!;
+    
+    public int RecipientId { get; set; }
+    [ForeignKey("RecipientId")]
+    public User Recipient { get; set; } = null!;
+    
+    public string Content { get; set; } = string.Empty;
+    
+    public bool IsRead { get; set; }
+    
+    public DateTime SentAt { get; set; } = DateTime.UtcNow;
 }

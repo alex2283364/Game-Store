@@ -4,43 +4,49 @@ import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 const Header = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
-    return (
-        <header className="header">
-            <div className="header-container">
-                <Link to="/" className="logo">
-                    🎮 GAME PORTAL
+  return (
+    <header className="header">
+      <div className="header-container">
+        <Link to="/" className="logo">
+          🎮 GAME PORTAL
+        </Link>
+
+        <nav className="nav">
+          <Link to="/" className="nav-link">🏠 Главная</Link>
+          <Link to="/store" className="nav-link">🛒 Магазин</Link>
+          {user && <Link to="/library" className="nav-link">📚 Библиотека</Link>}
+          {user && <Link to="/chat" className="nav-link">💬 Чат</Link>}
+          {user && <Link to="/cart" className="cart-link">🛒 Корзина</Link>}
+        </nav>
+
+        <div className="header-actions">
+          {user ? (
+            <>
+              <div className="user-info">
+                <span className="user-balance">💰 {user.balance?.toFixed(2) || 0} ₽</span>
+                <Link to="/profile" className="user-profile">
+                  👤 {user.username}
                 </Link>
-
-                <nav className="nav">
-                    <Link to="/" className="nav-link">🏠 Главная</Link>
-                    <Link to="/store" className="nav-link">🛒 Магазин</Link>
-                    {user && <Link to="/library" className="nav-link">📚 Библиотека</Link>}
-                    {user && <Link to="/chat" className="nav-link">💬 Чат</Link>}
-                </nav>
-
-                <div className="header-actions">
-                    {user ? (
-                        <>
-                            <span className="username">👤 {user.username}</span>
-                            <button onClick={handleLogout} className="logout-btn">
-                                Выйти
-                            </button>
-                        </>
-                    ) : (
-                        <Link to="/login" className="login-btn">🔐 Войти</Link>
-                    )}
-                </div>
-            </div>
-        </header>
-    );
+              </div>
+              <button onClick={handleLogout} className="logout-btn">
+                Выйти
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="login-btn">🔐 Войти</Link>
+          )}
+        </div>
+      </div>
+    </header>
+  );
 };
 
 export default Header;

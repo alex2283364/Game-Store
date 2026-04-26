@@ -1,54 +1,96 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
+using server.Data;
+using server.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace server.Hubs
+namespace server.Hubs;
+
+[Authorize]
+public class ChatHub : Hub
 {
-    [Authorize]
-    public class ChatHub : Hub
+    private readonly ILogger<ChatHub> _logger;
+    private readonly AppDbContext _context;
+
+    public ChatHub(ILogger<ChatHub> logger, AppDbContext context)
     {
-        private readonly ILogger<ChatHub> _logger;
+        _logger = logger;
+        _context = context;
+    }
 
-        public ChatHub(ILogger<ChatHub> logger)
-        {
-            _logger = logger;
-        }
+    // 🔥 ОТПРАВКА СООБЩЕНИЯ
+   public async Task SendMessage(string recipientId, string content)
+{
+    var senderId = Context.UserIdentifier;
+    
+    if (string.IsNullOrEmpty(senderId) || string.IsNullOrEmpty(recipientId) || string.IsNullOrEmpty(content))
+        return;
 
-        public override async Task OnConnectedAsync()
-        {
-            var userId = Context.UserIdentifier;
-            _logger.LogInformation($"User {userId} connected");
-            await Clients.Caller.SendAsync("Connected", Context.ConnectionId);
-            await base.OnConnectedAsync();
-        }
+    var message = new Message
+    {
+        SenderId = int.Parse(senderId),
+        RecipientId = int.Parse(recipientId),
+        Content = content.Trim(),
+        SentAt = DateTime.UtcNow,
+        IsRead = false
+    };
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            var userId = Context.UserIdentifier;
-            _logger.LogInformation($"User {userId} disconnected");
-            await base.OnDisconnectedAsync(exception);
-        }
+    _context.Messages.Add(message);
+    await _context.SaveChangesAsync();
 
-        public async Task SendMessage(string recipientId, string message)
+    var savedMessage = await _context.Messages
+        .Where(m => m.Id == message.Id)
+        .Select(m => new
         {
-            var senderId = Context.UserIdentifier;
-            
-            await Clients.User(recipientId).SendAsync("ReceiveMessage", new
+            m.Id,
+            m.SenderId,
+            m.RecipientId,
+            m.Content,
+            m.SentAt,
+            m.IsRead
+        })
+        .FirstOrDefaultAsync();
+
+    if (savedMessage != null)
+    {
+        // 🔥 Отправляем ПОЛУЧАТЕЛЮ
+        await Clients.User(recipientId).SendAsync("ReceiveMessage", savedMessage);
+        
+        // 🔥 Отправляем ОТПРАВИТЕЛЮ
+        await Clients.Caller.SendAsync("MessageSent", savedMessage);
+    }
+}
+    // Подключение пользователя
+    public override async Task OnConnectedAsync()
+    {
+        var userId = Context.UserIdentifier;
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var user = await _context.Users.FindAsync(int.Parse(userId));
+            if (user != null)
             {
-                senderId,
-                recipientId,
-                message,
-                timestamp = DateTime.UtcNow
-            });
+                user.IsOnline = true;
+                await _context.SaveChangesAsync();
+                await Clients.Others.SendAsync("UserStatusChanged", userId, true);
+            }
         }
+        await base.OnConnectedAsync();
+    }
 
-        public async Task JoinConversation(string conversationId)
+    // Отключение пользователя
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var userId = Context.UserIdentifier;
+        if (!string.IsNullOrEmpty(userId))
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
+            var user = await _context.Users.FindAsync(int.Parse(userId));
+            if (user != null)
+            {
+                user.IsOnline = false;
+                await _context.SaveChangesAsync();
+                await Clients.Others.SendAsync("UserStatusChanged", userId, false);
+            }
         }
-
-        public async Task LeaveConversation(string conversationId)
-        {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId);
-        }
+        await base.OnDisconnectedAsync(exception);
     }
 }

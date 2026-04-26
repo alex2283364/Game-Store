@@ -1,0 +1,94 @@
+.user-search {
+  padding: 15px;
+  background: #171a21;
+  border-bottom: 1px solid #2a475e;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #2a475e;
+  border-radius: 8px;
+  background: #2a475e;
+  color: #c7d5e0;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #66c0f4;
+}
+
+.search-loading {
+  padding: 10px;
+  color: #8b9bb4;
+  font-size: 13px;
+  text-align: center;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 15px;
+  right: 15px;
+  background: #1b2838;
+  border: 1px solid #2a475e;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.search-result-item:hover {
+  background: #2a475e;
+}
+
+.search-result-item .avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #3a4d5c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  position: relative;
+}
+
+.search-result-item .avatar.online::after,
+.search-result-item .avatar.offline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #1b2838;
+}
+
+.search-result-item .avatar.online::after { background: #4c6b22; }
+.search-result-item .avatar.offline::after { background: #666; }
+
+.search-result-item .username {
+  flex: 1;
+  font-weight: 500;
+}
+
+.search-result-item .status {
+  font-size: 12px;
+}
+
+.search-result-item .status.online { color: #4c6b22; }
+.search-result-item .status.offline { color: #666; }

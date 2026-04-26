@@ -98,6 +98,7 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors("AllowReact");
 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -115,7 +116,6 @@ app.MapHub<ChatHub>("/chathub");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    DbInitializer.Initialize(db);
     try
     {
         db.Database.Migrate();
@@ -128,4 +128,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 Console.WriteLine("🚀 Server starting on http://localhost:5000");
+app.UseStaticFiles();
 app.Run();
