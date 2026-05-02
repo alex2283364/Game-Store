@@ -1,115 +1,131 @@
 import * as signalR from '@microsoft/signalr';
 
 class SignalRService {
-  constructor() {
-    this.connection = null;
-    this.onMessageCallback = null;
-    this.onMessageSentCallback = null;
-    this.onConversationUpdateCallback = null;
-    this.onUserStatusCallback = null;
-  }
-
-  async startConnection(token, baseUrl = 'http://localhost:5000') {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      return true;
+    constructor() {
+        this.connection = null;
+        this.onMessageCallback = null;
+        this.onMessageSentCallback = null;
+        this.onConversationUpdateCallback = null;
+        this.onUserStatusCallback = null;
     }
 
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${baseUrl}/chathub`, {
-        accessTokenFactory: () => token
-      })
-      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
-      .build();
+    async startConnection(token, baseUrl = 'http://localhost:5000') {
+        if (this.connection?.state === signalR.HubConnectionState.Connected) {
+            console.log('✅ SignalR уже подключён');
+            return true;
+        }
 
-    // Входящие сообщения
-    this.connection.on('ReceiveMessage', (message) => {
-      console.log('📩 ReceiveMessage:', message);
-      if (this.onMessageCallback) {
-        this.onMessageCallback(message, false);
-      }
-    });
+        console.log('🔌 Подключение к SignalR с токеном...');
 
-    // Подтверждение отправки
-    this.connection.on('MessageSent', (message) => {
-      console.log('✅ MessageSent:', message);
-      if (this.onMessageSentCallback) {
-        this.onMessageSentCallback(message, true);
-      }
-    });
+        // 🔥 ВАЖНО: Токен передаём через accessTokenFactory
+        this.connection = new signalR.HubConnectionBuilder()
+            .withUrl(`${baseUrl}/chathub`, {
+                accessTokenFactory: () => {
+                    console.log('🔑 Передаю токен:', token ? 'есть' : 'нет');
+                    return token;
+                },
+                // 🔥 Используем WebSockets + LongPolling
+                transport: signalR.HttpTransportType.WebSockets | 
+                          signalR.HttpTransportType.LongPolling,
+                skipNegotiation: false
+            })
+            .withAutomaticReconnect([0, 2000, 5000])
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
 
-    // Обновление диалога
-    this.connection.on('ConversationUpdated', (message) => {
-      console.log('🔄 ConversationUpdated:', message);
-      if (this.onConversationUpdateCallback) {
-        this.onConversationUpdateCallback(message);
-      }
-    });
+        this.connection.on('ReceiveMessage', (message) => {
+            console.log('📩 ReceiveMessage:', message);
+            if (this.onMessageCallback) {
+                this.onMessageCallback(message, false);
+            }
+        });
 
-    // Статус пользователя
-    this.connection.on('UserStatusChanged', (userId, isOnline) => {
-      console.log('🟢 UserStatusChanged:', userId, isOnline);
-      if (this.onUserStatusCallback) {
-        this.onUserStatusCallback(userId, isOnline);
-      }
-    });
+        this.connection.on('MessageSent', (message) => {
+            console.log('✅ MessageSent:', message);
+            if (this.onMessageSentCallback) {
+                this.onMessageSentCallback(message, true);
+            }
+        });
 
-    this.connection.onreconnecting((error) => {
-      console.log('🔄 Reconnecting...', error);
-    });
+        this.connection.on('ConversationUpdated', () => {
+            console.log('🔄 ConversationUpdated');
+            if (this.onConversationUpdateCallback) {
+                this.onConversationUpdateCallback();
+            }
+        });
 
-    this.connection.onreconnected((connectionId) => {
-      console.log('✅ Reconnected:', connectionId);
-    });
+        this.connection.on('UserStatusChanged', (userId, isOnline) => {
+            console.log('🟢 UserStatusChanged:', userId, isOnline);
+            if (this.onUserStatusCallback) {
+                this.onUserStatusCallback(userId, isOnline);
+            }
+        });
 
-    this.connection.onclose((error) => {
-      console.log('❌ Closed:', error);
-    });
+        this.connection.onreconnecting((error) => {
+            console.log('🔄 Reconnecting...', error);
+        });
 
-    try {
-      await this.connection.start();
-      console.log('✅ SignalR connected');
-      return true;
-    } catch (err) {
-      console.error('❌ SignalR error:', err);
-      setTimeout(() => this.startConnection(token, baseUrl), 5000);
-      return false;
+        this.connection.onreconnected((connectionId) => {
+            console.log('✅ Reconnected:', connectionId);
+        });
+
+        this.connection.onclose((error) => {
+            console.log('❌ Closed:', error);
+        });
+
+        try {
+            await this.connection.start();
+            console.log('✅ SignalR connected successfully');
+            return true;
+        } catch (err) {
+            console.error('❌ SignalR connection error:', err);
+            console.error('Error details:', err.message);
+            
+            // Пробуем переподключиться через 3 секунды
+            setTimeout(() => {
+                console.log('🔄 Повторная попытка подключения...');
+                this.startConnection(token, baseUrl);
+            }, 3000);
+            
+            return false;
+        }
     }
-  }
 
-  async sendMessage(recipientId, content) {
-    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
-      throw new Error('SignalR not connected');
+    async sendMessage(recipientId, content) {
+        if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+            throw new Error('SignalR not connected');
+        }
+        console.log('📤 Отправка сообщения:', recipientId, content);
+        await this.connection.invoke('SendMessage', recipientId.toString(), content);
     }
-    await this.connection.invoke('SendMessage', recipientId.toString(), content);
-  }
 
-  onMessage(callback) {
-    this.onMessageCallback = callback;
-  }
-
-  onMessageSent(callback) {
-    this.onMessageSentCallback = callback;
-  }
-
-  onConversationUpdate(callback) {
-    this.onConversationUpdateCallback = callback;
-  }
-
-  onUserStatus(callback) {
-    this.onUserStatusCallback = callback;
-  }
-
-  async stopConnection() {
-    if (this.connection) {
-      await this.connection.stop();
-      this.connection = null;
-      console.log('SignalR disconnected');
+    onMessage(callback) {
+        this.onMessageCallback = callback;
     }
-  }
 
-  isConnected() {
-    return this.connection?.state === signalR.HubConnectionState.Connected;
-  }
+    onMessageSent(callback) {
+        this.onMessageSentCallback = callback;
+    }
+
+    onConversationUpdate(callback) {
+        this.onConversationUpdateCallback = callback;
+    }
+
+    onUserStatus(callback) {
+        this.onUserStatusCallback = callback;
+    }
+
+    async stopConnection() {
+        if (this.connection) {
+            await this.connection.stop();
+            this.connection = null;
+            console.log('SignalR disconnected');
+        }
+    }
+
+    isConnected() {
+        return this.connection?.state === signalR.HubConnectionState.Connected;
+    }
 }
 
 export default new SignalRService();

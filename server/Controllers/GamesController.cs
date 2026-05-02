@@ -20,7 +20,10 @@ public class GamesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Game>>> GetGames()
     {
-        var games = await _context.Games.ToListAsync();
+        var games = await _context.Games
+    .OrderByDescending(g => g.Rating)
+    .Take(10)  // ← Вот здесь!
+    .ToListAsync();
         return Ok(games);
     }
 

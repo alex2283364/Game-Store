@@ -3,9 +3,7 @@
 -- =====================================================
 
 -- 1. Создаём базу данных (если не существует)
-SELECT 'CREATE DATABASE gaming_portal'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'gaming_portal');
-
+CREATE database gaming_portal;
 -- Подключаемся к базе (выполняется отдельно в pgAdmin)
 -- \c gaming_portal
 
@@ -216,13 +214,3 @@ ON "CartItems" ("UserId");
 
 CREATE INDEX IF NOT EXISTS "IX_CartItems_GameId" 
 ON "CartItems" ("GameId");
-
-SELECT '✅ Таблица CartItems создана!' AS Status;
-
--- Проверка
-SELECT COUNT(*) as "Игр в корзине" FROM "CartItems";
-
-SELECT '✅ Таблица Friendships создана!' AS Status;
-
--- Готово!
-SELECT '✅ Схема базы данных создана успешно!' AS Status;

@@ -253,3 +253,62 @@
     flex-direction: column;
   }
 }
+
+/* 1. Прогресс бар до бесплатной доставки */
+.free-shipping-progress {
+  background: #1b2838;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #8b9bb4;
+}
+
+.progress-track {
+  height: 8px;
+  background: #2a475e;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4c6b22, #6c8b42);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* 2. Рекомендации в корзине */
+.cart-recommendations {
+  background: #1b2838;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 30px 0;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* 3. Анимация удаления товара */
+.cart-item.removing {
+  animation: slideOut 0.3s ease forwards;
+}
+
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+    height: 0;
+    margin: 0;
+    padding: 0;
+  }
+}

@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // 🔥 Важно!
 
   useEffect(() => {
     checkAuth();
@@ -13,20 +13,22 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
+    
     if (!token) {
       setLoading(false);
       return;
     }
 
     try {
+      // 🔥 Проверяем токен на сервере
       const response = await api.get('/users/profile');
       setUser(response.data);
     } catch (error) {
-      console.error('Ошибка авторизации:', error);
+      console.error('Auth check failed:', error);
       localStorage.removeItem('token');
       setUser(null);
     } finally {
-      setLoading(false);
+      setLoading(false); // 🔥 Проверка завершена
     }
   };
 
@@ -49,24 +51,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // ✅ Функция обновления баланса
-  const updateUserBalance = (newBalance) => {
-    if (user) {
-      setUser(prevUser => ({ 
-        ...prevUser, 
-        balance: newBalance 
-      }));
-    }
-  };
-
   return (
     <AuthContext.Provider value={{ 
       user, 
-      loading, 
+      loading,  // 🔥 Экспортируем loading
       login, 
       register, 
-      logout, 
-      updateUserBalance  // ✅ Экспортируем функцию
+      logout,
+      updateUserBalance: (newBalance) => {
+        if (user) {
+          setUser(prev => ({ ...prev, balance: newBalance }));
+        }
+      }
     }}>
       {children}
     </AuthContext.Provider>

@@ -718,3 +718,94 @@
   font-size: 14px;
   margin-top: 10px;
 }
+
+/* 1. Анимированные вкладки */
+.profile-tabs {
+  display: flex;
+  gap: 10px;
+  background: #1b2838;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: #8b9bb4;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.tab-btn.active {
+  color: #1b2838;
+}
+
+.tab-indicator {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: calc(100% - 20px);
+  background: #66c0f4;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+/* 2. Прогресс бар достижений */
+.achievement-progress {
+  background: #2a475e;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #1b2838;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #66c0f4, #4a9fd8);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* 3. Статистика в виде круговых диаграмм */
+.stats-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(#66c0f4 0% 75%, #2a475e 75% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.stats-circle::before {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: #1b2838;
+  border-radius: 50%;
+}
+
+.stats-circle-value {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  font-weight: bold;
+  color: #66c0f4;
+}

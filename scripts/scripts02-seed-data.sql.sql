@@ -337,15 +337,47 @@ VALUES
   (1, 3, 'Вечером заходи', TRUE, NOW() - INTERVAL '25 minutes'),
   (4, 2, 'Купил Cyberpunk, стоит начинать?', FALSE, NOW() - INTERVAL '10 minutes');
 
--- Проверка данных
-SELECT '✅ Данные добавлены успешно!' AS Status;
-SELECT '📊 Всего игр: ' || COUNT(*) FROM "Games";
-SELECT '👥 Всего пользователей: ' || COUNT(*) FROM "Users";
-SELECT '🛒 Всего заказов: ' || COUNT(*) FROM "Orders";
-SELECT '💬 Всего сообщений: ' || COUNT(*) FROM "Messages";
 
--- Показать игры по жанрам
-SELECT "Genre", COUNT(*) as "Количество" 
-FROM "Games" 
-GROUP BY "Genre" 
-ORDER BY "Количество" DESC;
+-- =====================================================
+-- ИСПРАВЛЕНИЕ: Локальные пути к картинкам (БЕЗ ПРОБЕЛОВ!)
+-- =====================================================
+
+UPDATE "Games" SET "ImageUrl" = '/images/games/' || 
+  CASE "Id"
+    WHEN 1 THEN 'TheWitcher3WildHunt.jpeg'
+    WHEN 2 THEN 'Cyberpunk2077.jpg'
+    WHEN 3 THEN 'TheElderScrollsVSkyrim.jpg'
+    WHEN 4 THEN 'DarkSoulsIII.jpg'
+    WHEN 5 THEN 'TheWitcher2AssassinsofKings.jpg'
+    WHEN 6 THEN 'FinalFantasyXV.jpg'
+    WHEN 7 THEN 'GrandTheftAutoV.jfif'
+    WHEN 8 THEN 'RedDeadRedemption2.jfif'
+    WHEN 9 THEN 'GodofWar.jfif'
+    WHEN 10 THEN 'DOOMEternal.jfif'
+    WHEN 11 THEN 'AssassinsCreedValhalla.jpg'
+    WHEN 12 THEN 'Minecraft.jfif'
+    WHEN 13 THEN 'StardewValley.jpeg'
+    WHEN 14 THEN 'Terraria.jfif'
+    WHEN 15 THEN 'TheSims4.jfif'
+    WHEN 16 THEN 'Portal2.jpg'
+    WHEN 17 THEN 'HollowKnight.jpg'
+    WHEN 18 THEN 'Celeste.jfif'
+    WHEN 19 THEN 'Undertale.jpg'
+    WHEN 20 THEN 'TheLegendofZeldaBreathoftheWild.jpeg'
+    WHEN 21 THEN 'Uncharted4AThiefsEnd.jpg'
+    WHEN 22 THEN 'TombRaider2013.jfif'
+    WHEN 23 THEN 'AmongUs.jfif'
+    WHEN 24 THEN 'CounterStrikeGlobalOffensive.jpeg'
+    WHEN 25 THEN 'FallGuys.jfif'
+    WHEN 26 THEN 'RocketLeague.jpg'
+    WHEN 27 THEN 'CivilizationVI.jpg'
+    WHEN 28 THEN 'StarCraftII.jpeg'
+    WHEN 29 THEN 'XCOM2.jpeg'
+    WHEN 30 THEN 'ResidentEvilVillage.jfif'
+    WHEN 31 THEN 'DeadSpace.jfif'
+    ELSE 'placeholder.jpg'
+  END
+WHERE "Id" <= 31;
+
+-- Проверка для Assassin's Creed Valhalla (ID=11)
+SELECT "Id", "Title", "ImageUrl" FROM "Games" WHERE "Id" = 11;

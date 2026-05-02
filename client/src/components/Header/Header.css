@@ -167,3 +167,94 @@
     text-align: center;
   }
 }
+/* 1. Активная страница в меню */
+.nav-link {
+  position: relative;
+  padding: 8px 12px;
+  transition: all 0.2s;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: #66c0f4;
+  transition: width 0.3s ease;
+}
+
+.nav-link.active::after {
+  width: 80%;
+}
+
+.nav-link:hover::after {
+  width: 80%;
+}
+
+/* 2. Уведомления в хедере */
+.notification-bell {
+  position: relative;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.notification-bell:hover {
+  background: rgba(102,192,244,0.1);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #c44;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* 3. Выпадающее меню профиля */
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #1b2838;
+  border: 1px solid #2a475e;
+  border-radius: 12px;
+  padding: 10px 0;
+  min-width: 200px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.profile-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: #c7d5e0;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.profile-dropdown-item:hover {
+  background: #2a475e;
+}
