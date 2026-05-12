@@ -3,7 +3,7 @@
 -- =====================================================
 
 -- 1. Создаём базу данных (если не существует)
-CREATE database gaming_portal;
+--CREATE database gaming_portal;
 -- Подключаемся к базе (выполняется отдельно в pgAdmin)
 -- \c gaming_portal
 

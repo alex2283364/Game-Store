@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gaming-postgres
+    environment:
+      POSTGRES_DB: gaming_portal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Временно закомментируйте scripts, если папка пустая или отсутствует
+      #- ./scripts/:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - gaming-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gaming_portal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: gamestore_server
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=gaming_portal;Username=postgres;Password=1
+      - JwtSettings__SecretKey=YourSuperSecretKeyThatIsAtLeast32CharactersLong!12345
+      - JwtSettings__Issuer=GamingPortal
+      - JwtSettings__Audience=GamingPortalUsers
+      - AllowedHosts=*
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gaming-network
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: gaming-client
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - gaming-network
+    restart: unless-stopped
+
+networks:
+  gaming-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
