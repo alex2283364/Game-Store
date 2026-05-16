@@ -10,8 +10,8 @@ services:
       POSTGRES_PASSWORD: "1"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Временно закомментируйте scripts, если папка пустая или отсутствует
-      #- ./scripts/:/docker-entrypoint-initdb.d
+      # 🔥 Раскомментируй когда будут скрипты!
+      - ./scripts-docker/:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     networks:
@@ -24,17 +24,16 @@ services:
 
   server:
     build:
-      context: .
-      dockerfile: server/Dockerfile
-    container_name: gamestore_server
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: gaming-server
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=gaming_portal;Username=postgres;Password=1
-      - JwtSettings__SecretKey=YourSuperSecretKeyThatIsAtLeast32CharactersLong!12345
+      - JwtSettings__SecretKey=YourSuperSecretKeyThatIsAtleast32CharactersLong!12345
       - JwtSettings__Issuer=GamingPortal
       - JwtSettings__Audience=GamingPortalUsers
-      - AllowedHosts=*
     ports:
       - "5000:5000"
     depends_on:
@@ -42,8 +41,9 @@ services:
         condition: service_healthy
     networks:
       - gaming-network
+    volumes:
+      - ./server/wwwroot/images/games:/app/wwwroot/images/games  # Картинки игр
     restart: unless-stopped
-
   client:
     build:
       context: .

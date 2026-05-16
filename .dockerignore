@@ -1,7 +1,32 @@
-node_modules
+# Build outputs
+bin/
+obj/
+Publish/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userprefs
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
 .git
 .gitignore
-*.md
-README.md
-.vscode
-**/node_modules
+
+# Environment
+.env
+.env.local
+appsettings.Development.json
+
+# Static files (монтируются через volume)
+wwwroot/images/games/*
+!wwwroot/images/games/.gitkeep
