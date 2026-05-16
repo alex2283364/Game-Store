@@ -18,6 +18,29 @@ public class UsersController : ControllerBase
         _context = context;
     }
 
+    // 🔥 GET: api/users/search?query=
+    [HttpGet("search")]
+    public async Task<ActionResult<List<UserDto>>> SearchUsers([FromQuery] string query)
+    {     if (string.IsNullOrWhiteSpace(query))
+            return Ok(new List<UserSearchDto>());
+
+        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
+
+        var users = await _context.Users
+            .Where(u => u.Username.Contains(query) && u.Id != currentUserId)
+            .Select(u => new UserSearchDto
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Avatar = u.Avatar,
+                IsOnline = u.IsOnline
+            })
+            .Take(10)
+            .ToListAsync();
+
+        return Ok(users);
+    }
+
     // GET: api/users/profile
     [HttpGet("profile")]
     public async Task<ActionResult<UserProfileDto>> GetProfile()
@@ -69,7 +92,7 @@ public class UsersController : ControllerBase
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
         
         var ownedGames = await _context.UserGames
-            .Where(ug => ug.UserId == userId)
+             .Where(ug => ug.UserId == userId)
             .Include(ug => ug.Game)
             .Select(ug => new UserGameDto
             {
@@ -85,6 +108,15 @@ public class UsersController : ControllerBase
 
         return Ok(ownedGames);
     }
+}
+
+// DTO для поиска
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string? Avatar { get; set; }
+    public bool IsOnline { get; set; }
 }
 
 // DTO для профиля

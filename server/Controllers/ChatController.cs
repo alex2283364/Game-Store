@@ -20,48 +20,48 @@ public class ChatController : ControllerBase
 
     // GET: api/chat/conversations
     [HttpGet("conversations")]
-   public async Task<ActionResult<List<ConversationDto>>> GetConversations()
-{
-    var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
-    
-    var otherUserIds = await _context.Messages
-        .Where(m => m.SenderId == userId || m.RecipientId == userId)
-        .Select(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
-        .Distinct()
-        .ToListAsync();
-
-    var conversations = new List<ConversationDto>();
-    
-    foreach (var otherId in otherUserIds)
+    public async Task<ActionResult<List<ConversationDto>>> GetConversations()
     {
-        var lastMessage = await _context.Messages
-            .Where(m => 
-                (m.SenderId == userId && m.RecipientId == otherId) ||
-                (m.SenderId == otherId && m.RecipientId == userId))
-            .OrderByDescending(m => m.SentAt)
-            .FirstOrDefaultAsync();
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
+        
+        var otherUserIds = await _context.Messages
+            .Where(m => m.SenderId == userId || m.RecipientId == userId)
+            .Select(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
+            .Distinct()
+            .ToListAsync();
 
-        var unreadCount = await _context.Messages
-            .CountAsync(m => m.SenderId == otherId && m.RecipientId == userId && !m.IsRead);
+        var conversations = new List<ConversationDto>();
 
-        var otherUser = await _context.Users.FindAsync(otherId);
-        if (otherUser != null)
+        foreach (var otherId in otherUserIds)
         {
-            conversations.Add(new ConversationDto
-            {
-                UserId = otherUser.Id,
-                Username = otherUser.Username,
-                Avatar = otherUser.Avatar,
-                IsOnline = otherUser.IsOnline,
-                LastMessage = lastMessage?.Content,
-                LastMessageAt = lastMessage?.SentAt,
-                UnreadCount = unreadCount
-            });
-        }
-    }
+            var lastMessage = await _context.Messages
+                .Where(m => 
+                    (m.SenderId == userId && m.RecipientId == otherId) ||
+                    (m.SenderId == otherId && m.RecipientId == userId))
+                .OrderByDescending(m => m.SentAt)
+                .FirstOrDefaultAsync();
 
-    return Ok(conversations.OrderByDescending(c => c.LastMessageAt).ToList());
-}
+            var unreadCount = await _context.Messages
+                .CountAsync(m => m.SenderId == otherId && m.RecipientId == userId && !m.IsRead);
+
+            var otherUser = await _context.Users.FindAsync(otherId);
+            if (otherUser != null)
+            {
+                conversations.Add(new ConversationDto
+                {
+                    UserId = otherUser.Id,
+                    Username = otherUser.Username,
+                    Avatar = otherUser.Avatar,
+                    IsOnline = otherUser.IsOnline,
+                    LastMessage = lastMessage?.Content,
+                    LastMessageAt = lastMessage?.SentAt,
+                    UnreadCount = unreadCount
+                });
+            }
+        }
+
+        return Ok(conversations.OrderByDescending(c => c.LastMessageAt).ToList());
+    }
 
     // GET: api/chat/messages/{userId}
     [HttpGet("messages/{userId}")]
@@ -85,7 +85,6 @@ public class ChatController : ControllerBase
             })
             .ToListAsync();
 
-        // Помечаем сообщения как прочитанные
         var unreadIds = messages
             .Where(m => m.RecipientId == currentUserId && !m.IsRead)
             .Select(m => m.Id)
@@ -130,4 +129,15 @@ public class ConversationDto
     public string? LastMessage { get; set; }
     public DateTime? LastMessageAt { get; set; }
     public int UnreadCount { get; set; }
+}
+
+// DTO для сообщения
+public class ChatMessageDto
+{
+    public int Id { get; set; }
+    public int SenderId { get; set; }
+    public int RecipientId { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public DateTime SentAt { get; set; }
+    public bool IsRead { get; set; }
 }

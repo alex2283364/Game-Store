@@ -2,28 +2,27 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
-COPY client/package.json ./
-COPY client/package-lock.json ./
+# Копируем ТОЛЬКО package файлы
+COPY package.json ./
+COPY yarn.lock ./
 
-RUN yarn install --legacy-peer-deps --frozen-lockfile
-RUN chmod -R 755 node_modules/.bin
+# Устанавливаем зависимости
+RUN yarn install --frozen-lockfile
 
-COPY client/ ./
-RUN chmod -R 755 node_modules/.bin
+# Копируем исходный код
+COPY . ./
+
+# Строим приложение
 RUN yarn build
 
 # Stage 2: Serve
 FROM nginx:alpine
 
-# Копируем файлы
+# Копируем билд
 COPY --from=build /app/build /usr/share/nginx/html
-COPY client/nginx.conf /etc/nginx/conf.d/default.conf
 
-# 🔥 Создаем кэш директорию и даем права ДО переключения на nginx
-RUN mkdir -p /var/cache/nginx/client_temp && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /etc/nginx/conf.d
+# Копируем конфиг
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
