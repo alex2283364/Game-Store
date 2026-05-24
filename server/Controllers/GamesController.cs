@@ -22,7 +22,6 @@ public class GamesController : ControllerBase
     {
         var games = await _context.Games
     .OrderByDescending(g => g.Rating)
-    .Take(10)  // ← Вот здесь!
     .ToListAsync();
         return Ok(games);
     }

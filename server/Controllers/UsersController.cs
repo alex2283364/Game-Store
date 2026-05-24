@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Models;
+using server.DTOs.Auth;
 
 namespace server.Controllers;
 
@@ -18,16 +19,19 @@ public class UsersController : ControllerBase
         _context = context;
     }
 
-    // 🔥 GET: api/users/search?query=
+    // GET: api/users/search?query=
     [HttpGet("search")]
-    public async Task<ActionResult<List<UserDto>>> SearchUsers([FromQuery] string query)
-    {     if (string.IsNullOrWhiteSpace(query))
+    public async Task<ActionResult<List<UserSearchDto>>> SearchUsers([FromQuery] string query)
+    {
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
+        
+        if (string.IsNullOrWhiteSpace(query))
             return Ok(new List<UserSearchDto>());
 
-        var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value!);
-
         var users = await _context.Users
-            .Where(u => u.Username.Contains(query) && u.Id != currentUserId)
+            .Where(u => u.Id != userId && 
+                       (EF.Functions.ILike(u.Username, $"%{query}%") || 
+                        EF.Functions.ILike(u.Email, $"%{query}%")))
             .Select(u => new UserSearchDto
             {
                 Id = u.Id,
@@ -110,15 +114,6 @@ public class UsersController : ControllerBase
     }
 }
 
-// DTO для поиска
-public class UserDto
-{
-    public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string? Avatar { get; set; }
-    public bool IsOnline { get; set; }
-}
-
 // DTO для профиля
 public class UserProfileDto
 {
@@ -130,6 +125,14 @@ public class UserProfileDto
     public DateTime CreatedAt { get; set; }
     public int OwnedGamesCount { get; set; }
     public decimal TotalSpent { get; set; }
+}
+
+public class UserSearchDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string? Avatar { get; set; }
+    public bool IsOnline { get; set; }
 }
 
 // DTO для обновления профиля

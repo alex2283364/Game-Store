@@ -12,7 +12,7 @@ const HomePage = () => {
   // Состояния карусели
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const AUTO_PLAY_INTERVAL = 5000; // 5 секунд
+  const AUTO_PLAY_INTERVAL = 5000;
 
   useEffect(() => {
     testConnection();
@@ -21,9 +21,11 @@ const HomePage = () => {
   // Автопрокрутка
   useEffect(() => {
     if (!isAutoPlaying || games.length <= 1) return;
+    
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % games.length);
     }, AUTO_PLAY_INTERVAL);
+    
     return () => clearInterval(timer);
   }, [isAutoPlaying, games.length]);
 
@@ -58,13 +60,15 @@ const HomePage = () => {
 
   const pauseAutoPlay = () => {
     setIsAutoPlaying(false);
-    // Возобновляем автопрокрутку через 8 сек после ручного действия
     setTimeout(() => setIsAutoPlaying(true), 8000);
   };
 
+  // 🔥 Берём только первые 10 игр для карусели
+  const carouselGames = games.slice(0, 10);
+
   // Рендер карусели
   const renderCarousel = () => {
-    if (loading || games.length === 0) {
+    if (loading || carouselGames.length === 0) {
       return (
         <div className="carousel-container carousel-loading">
           <p>{loading ? 'Загрузка баннеров...' : 'Нет игр для отображения'}</p>
@@ -72,16 +76,23 @@ const HomePage = () => {
       );
     }
 
-    const currentGame = games[currentIndex];
-    // Замените `cover_image` на поле, которое используется в вашем API
-   const getImageUrl = (game) => {
+    // 🔥 Получаем текущую игру с проверкой
+    const currentGame = carouselGames[currentIndex];
+    
+    // 🔥 Если игры нет - показываем первую
+    if (!currentGame) {
+      setCurrentIndex(0);
+      return null;
+    }
+
+    const getImageUrl = (game) => {
       if (game.imageUrl?.startsWith('/')) {
         return `http://localhost:5000${game.imageUrl}`;
       }
       if (game.imageUrl?.startsWith('http')) {
         return game.imageUrl;
       }
-      return `https://via.placeholder.com/600x400?text=${encodeURIComponent(game.title)}`;
+      return `https://via.placeholder.com/600x400?text=${encodeURIComponent(game.title || 'Game')}`;
     };
 
     return (
@@ -91,11 +102,11 @@ const HomePage = () => {
         onMouseLeave={() => setIsAutoPlaying(true)}
       >
         <div className="carousel-slide active">
-          <img src={getImageUrl(currentGame)} alt={currentGame.name} className="carousel-image" />
+          <img src={getImageUrl(currentGame)} alt={currentGame.title || currentGame.name} className="carousel-image" />
           <div className="carousel-overlay">
             <div className="carousel-content">
-              <h2>{currentGame.name}</h2>
-              <p className="carousel-desc">{currentGame.description?.slice(0, 120)}...</p>
+              <h2>{currentGame.title || currentGame.name}</h2>
+              <p className="carousel-desc">{currentGame.description?.slice(0, 120) || 'Описание недоступно'}...</p>
               <div className="carousel-actions">
                 <span className="carousel-price">₽{currentGame.price ?? '0.00'}</span>
                 <button className="carousel-cta-btn">Подробнее</button>
@@ -108,9 +119,9 @@ const HomePage = () => {
         <button className="carousel-btn prev" onClick={prevSlide} aria-label="Предыдущая игра">&#10094;</button>
         <button className="carousel-btn next" onClick={nextSlide} aria-label="Следующая игра">&#10095;</button>
 
-        {/* Точки навигации */}
+        {/* Точки навигации - ТОЛЬКО для карусели (10 игр) */}
         <div className="carousel-dots">
-          {games.map((_, idx) => (
+          {carouselGames.map((_, idx) => (
             <button
               key={idx}
               className={`carousel-dot ${idx === currentIndex ? 'active' : ''}`}
@@ -125,23 +136,21 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-
-      {/* Карусель игр (Steam-style) */}
+      {/* Карусель игр (ТОЛЬКО 10 ИГР) */}
       <section className="featured-carousel">
         {renderCarousel()}
       </section>
 
-
-      {/* Список игр */}
+      {/* Список игр (ВСЕ ИГРЫ) */}
       <section className="games-section">
         <h2>🔥 Доступные игры</h2>
         {loading ? (
           <div className="loader">Загрузка...</div>
         ) : games.length > 0 ? (
           <div className="games-grid">
-            {games.slice(0, 10).map((game) => (
-    <GameCard key={game.id} game={game} />
-))}
+            {games.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
           </div>
         ) : (
           <div className="empty-state">

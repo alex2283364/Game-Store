@@ -3,11 +3,9 @@
 -- =====================================================
 
 -- 1. Создаём базу данных (если не существует)
---CREATE database gaming_portal;
+CREATE database gaming_portal;
 -- Подключаемся к базе (выполняется отдельно в pgAdmin)
 -- \c gaming_portal
-
--- 2. Создаём таблицы
 
 -- Таблица пользователей
 CREATE TABLE IF NOT EXISTS "Users" (
@@ -20,6 +18,25 @@ CREATE TABLE IF NOT EXISTS "Users" (
     "IsOnline" BOOLEAN DEFAULT FALSE,
     "CreatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+
+CREATE TABLE IF NOT EXISTS "OrderItems" (
+    "Id" SERIAL PRIMARY KEY,
+    "OrderId" INTEGER NOT NULL,
+    "GameId" INTEGER NOT NULL,
+    "Price" DECIMAL(10, 2) NOT NULL,
+    
+    CONSTRAINT "FK_OrderItems_Orders_OrderId"
+        FOREIGN KEY ("OrderId")
+        REFERENCES "Orders" ("Id")
+        ON DELETE CASCADE,
+    
+    CONSTRAINT "FK_OrderItems_Games_GameId"
+        FOREIGN KEY ("GameId")
+        REFERENCES "Games" ("Id")
+        ON DELETE RESTRICT
+);
+
 
 -- Таблица игр
 CREATE TABLE IF NOT EXISTS "Games" (
@@ -48,23 +65,6 @@ CREATE TABLE IF NOT EXISTS "Orders" (
         ON DELETE CASCADE
 );
 
--- Таблица элементов заказа (связь Orders ↔ Games)
-CREATE TABLE IF NOT EXISTS "OrderItems" (
-    "Id" SERIAL PRIMARY KEY,
-    "OrderId" INTEGER NOT NULL,
-    "GameId" INTEGER NOT NULL,
-    "Price" DECIMAL(10, 2) NOT NULL,
-    
-    CONSTRAINT "FK_OrderItems_Orders_OrderId"
-        FOREIGN KEY ("OrderId")
-        REFERENCES "Orders" ("Id")
-        ON DELETE CASCADE,
-    
-    CONSTRAINT "FK_OrderItems_Games_GameId"
-        FOREIGN KEY ("GameId")
-        REFERENCES "Games" ("Id")
-        ON DELETE RESTRICT
-);
 
 -- Таблица сообщений (для чата)
 CREATE TABLE IF NOT EXISTS "Messages" (
@@ -149,7 +149,6 @@ ON "PaymentTransactions" ("UserId");
 CREATE INDEX IF NOT EXISTS "IX_PaymentTransactions_TransactionDate" 
 ON "PaymentTransactions" ("TransactionDate");
 
-SELECT '✅ Таблицы UserGames и PaymentTransactions созданы!' AS Status;
 
 -- Создаём таблицу Friendships
 CREATE TABLE IF NOT EXISTS "Friendships" (
