@@ -28,7 +28,7 @@ const GameCard = ({ game, owned = false }) => {
   alt={game.title}
   onError={(e) => {
     console.error('Ошибка загрузки:', game.title, getImageUrl(game));
-    e.target.src = `https://via.placeholder.com/300x200?text=${encodeURIComponent(game.title)}`;
+    e.target.src = `http://localhost:5000${game.imageUrl}`;
   }}
         />
         {owned && <div className="owned-badge">✓</div>}

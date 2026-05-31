@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import GameCard from '../components/Store/GameCard';
 import './HomePage.css';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('checking');
+  const navigate = useNavigate(); 
   
   // Состояния карусели
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,6 +68,11 @@ const HomePage = () => {
   // 🔥 Берём только первые 10 игр для карусели
   const carouselGames = games.slice(0, 10);
 
+
+  const handleGameDetails = (gameId) => {
+    navigate(`/game/${gameId}`);
+  };
+
   // Рендер карусели
   const renderCarousel = () => {
     if (loading || carouselGames.length === 0) {
@@ -109,7 +116,7 @@ const HomePage = () => {
               <p className="carousel-desc">{currentGame.description?.slice(0, 120) || 'Описание недоступно'}...</p>
               <div className="carousel-actions">
                 <span className="carousel-price">₽{currentGame.price ?? '0.00'}</span>
-                <button className="carousel-cta-btn">Подробнее</button>
+                <button className="carousel-cta-btn"  onClick={() => handleGameDetails(currentGame.id)} >Подробнее</button>
               </div>
             </div>
           </div>
