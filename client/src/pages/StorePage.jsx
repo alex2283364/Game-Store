@@ -169,7 +169,12 @@ const StorePage = () => {
                         const isOwned = ownedGames.some(og => og.id === game.id);
                         
                         return (
-                            <div key={game.id} className="game-card">
+                            <div 
+                            key={game.id} 
+                            className="game-card"
+                            onClick={() => navigate(`/game/${game.id}`)}
+                            style={{ cursor: 'pointer' }} // Чтобы курсор менялся на "палец" при наведении
+                        >
                                 <div className="game-image">
                                     <img 
                                         src={`http://localhost:5000${game.imageUrl}`} 

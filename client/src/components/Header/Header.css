@@ -258,3 +258,28 @@
 .profile-dropdown-item:hover {
   background: #2a475e;
 }
+
+/* Для страницы логина */
+.login-logo {
+  width: 120px; /* Подбери размер под свой дизайн */
+  height: auto;
+  margin-bottom: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Для глобального хедера */
+.header-logo {
+  height: 40px; /* Оптимальная высота для шапки */
+  width: auto;
+  vertical-align: middle;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}

@@ -1,15 +1,10 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
 const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json'
-    }
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
 });
 
-// Автоматическое добавление токена
+// Добавляем токен к запросам
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -26,8 +21,13 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+            // НЕ делаем редирект, если это запрос на логин
+            const isLoginRequest = error.config?.url?.includes('/auth/login');
+            
+            if (!isLoginRequest) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

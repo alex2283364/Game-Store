@@ -249,7 +249,12 @@ const removeFriend = async (userId) => {
               {ownedGames.length > 0 ? (
                 <div className="games-grid">
                   {ownedGames.map(game => (
-                    <div key={game.id} className="game-card">
+                   <div 
+                   key={game.id} 
+                   className="game-card"
+                   onClick={() => navigate(`/game/${game.id}`)}
+                   style={{ cursor: 'pointer' }}
+               >
                       <img src={`http://localhost:5000${game.imageUrl}`} alt={game.title} />
                       <div className="game-card-info">
                         <h3>{game.title}</h3>

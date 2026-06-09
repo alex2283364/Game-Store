@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
+import logo from '../assets/images/logo.png'; 
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
@@ -25,6 +26,8 @@ const LoginPage = () => {
     return (
         <div className="login-page">
             <div className="login-container">
+            <img src={logo} alt="Game Store Logo" className="login-logo" />
+            
                 <h2>🔐 Вход в систему</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>

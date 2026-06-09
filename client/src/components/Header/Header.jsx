@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Header.css';
+import logo from '../../assets/images/logo.png'; // Путь к твоему логотипу
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -15,9 +16,10 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
-        <Link to="/" className="logo">
-          🎮 GAME PORTAL
-        </Link>
+      <Link to="/" className="logo-link">
+                <img src={logo} alt="Game Store" className="header-logo" />
+                <span className="logo-text">Game Store</span>
+            </Link>
 
         <nav className="nav">
           <Link to="/" className="nav-link">🏠 Главная</Link>
