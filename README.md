@@ -82,11 +82,21 @@ cd Game-Store
 # 2. Запуск
 
 ```bash
-# Запустить все сервисы
+# Первый запуск со сборкой
+docker compose up --build -d
+
+# Обычный запуск (запуск всех сервисов)
 docker compose up -d
 
-# Или с пересборкой
-docker compose up --build -d
+Запуск отдельного контейнера (если не используется docker compose)
+# Запустить существующий остановленный контейнер
+docker start <container_name_or_id>
+
+# С фоновым режимом (опционально)
+docker start -d <container_name_or_id>
+
+# Создать и запустить новый контейнер
+docker run -d --name <container_name> <image_name>
 ```
 
 # 3. Проверка
